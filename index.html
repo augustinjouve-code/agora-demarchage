@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Agora — Démarchage</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --surface2: #f0ece4;
+  --border: #e0d9ce;
+  --navy: #1a1f2e;
+  --gold: #b8860b;
+  --gold-light: #d4a017;
+  --green: #2d6a4f;
+  --red: #c0392b;
+  --orange: #d35400;
+  --text: #1a1f2e;
+  --muted: #7a7060;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* HEADER */
+header {
+  background: var(--navy);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+.logo em { color: var(--gold-light); font-style: normal; }
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #e74c3c; }
+.dot.ok { background: #27ae60; }
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 36px 20px; }
+
+/* PROGRESS */
+.progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.progress-step {
+  flex: 1;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+.progress-step:last-child { border-right: none; }
+.progress-step.active {
+  background: var(--navy);
+  color: #fff;
+}
+.progress-step.done { color: var(--green); }
+.progress-step.active .step-num { background: var(--gold-light); color: var(--navy); }
+.progress-step.done .step-num { background: var(--green); color: #fff; }
+
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* PANELS */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 16px;
+}
+
+.card-head {
+  margin-bottom: 20px;
+}
+.card-head h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.card-head p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* FORM */
+label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+input, textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type="password"] { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+input:focus, textarea:focus { border-color: var(--navy); }
+textarea { min-height: 200px; resize: vertical; line-height: 1.5; }
+
+.field { margin-bottom: 18px; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px;
+  border-radius: 5px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #2c3347; }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--navy); }
+.btn-ghost { background: var(--surface2); color: var(--muted); }
+.btn-ghost:hover { color: var(--text); }
+.btn-copy { background: var(--surface2); color: var(--navy); border: 1px solid var(--border); padding: 8px 14px; font-size: 12px; }
+.btn-copy:hover { background: var(--navy); color: #fff; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+
+.btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
+
+/* COMPANY CARDS */
+.companies-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+.co-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.co-card:hover { border-color: var(--navy); box-shadow: 0 4px 16px rgba(26,31,46,0.08); }
+
+.co-sector {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.co-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.co-contact { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.co-role { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+.co-linkedin {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--navy);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+.co-linkedin:hover { color: var(--gold); }
+
+.co-email-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.co-email-row input {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 7px 10px;
+  min-width: 0;
+}
+.email-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.email-dot.found { background: var(--green); }
+.email-dot.missing { background: var(--orange); }
+.email-dot.searching { background: var(--gold); animation: blink 0.9s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.co-justif {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* COPY BOX */
+.copy-box {
+  background: var(--navy);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.copy-box pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.copy-box-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.copy-box-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.copy-btn-float {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: background 0.2s;
+}
+.copy-btn-float:hover { background: rgba(255,255,255,0.2); }
+.copy-btn-float.copied { background: var(--green); border-color: var(--green); }
+
+/* INFO BANNER */
+.info-banner {
+  background: #fff8e7;
+  border: 1px solid #f0d080;
+  border-left: 4px solid var(--gold);
+  border-radius: 0 5px 5px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #5a4a00;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.info-banner strong { color: #3a3000; }
+
+.success-banner {
+  background: #e8f5ee;
+  border: 1px solid #a8d5b8;
+  border-left: 4px solid var(--green);
+  border-radius: 0 5px 5px 0;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.success-banner h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.success-banner p { font-size: 13px; color: #2d5a3d; }
+
+/* TAG */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.tag-green { background: #e8f5ee; color: var(--green); }
+.tag-orange { background: #fdf0e0; color: var(--orange); }
+.tag-navy { background: var(--surface2); color: var(--navy); }
+
+/* LOADING */
+#loader {
+  display: none; position: fixed; inset: 0;
+  background: rgba(247,244,239,0.85);
+  z-index: 200; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  backdrop-filter: blur(4px);
+}
+#loader.on { display: flex; }
+.spin {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loaderText {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--navy);
+  letter-spacing: 0.06em;
+}
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy); color: #fff;
+  padding: 12px 20px; border-radius: 6px;
+  font-size: 13px; z-index: 300;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.25s; pointer-events: none;
+  max-width: 320px;
+}
+#toast.on { opacity: 1; transform: translateY(0); }
+#toast.err { background: var(--red); }
+
+/* STAT ROW */
+.stat-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  flex: 1; min-width: 120px;
+}
+.stat-val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; }
+.stat-label { font-size: 12px; color: var(--muted); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spin"></div><div id="loaderText">Chargement...</div></div>
+<div id="toast"></div>
+
+<header>
+  <div class="logo">L'<em>AGORA</em> — Outil Démarchage</div>
+  <div class="header-status">
+    <div class="dot" id="hunterDot"></div>
+    <span id="hunterStatus">Hunter.io non configuré</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress">
+    <div class="progress-step active" id="tab1" onclick="goTo(1)">
+      <div class="step-num">1</div> Config & Tableau
+    </div>
+    <div class="progress-step" id="tab2" onclick="goTo(2)">
+      <div class="step-num">2</div> Entreprises
+    </div>
+    <div class="progress-step" id="tab3" onclick="goTo(3)">
+      <div class="step-num">3</div> Recherche emails
+    </div>
+    <div class="progress-step" id="tab4" onclick="goTo(4)">
+      <div class="step-num">4</div> Prompt pour Claude
+    </div>
+  </div>
+
+  <!-- ═══ ÉTAPE 1 ═══ -->
+  <div class="panel active" id="p1">
+    <div class="card">
+      <div class="card-head">
+        <h2>Configuration</h2>
+        <p>Clé Hunter.io + tableau de suivi — à faire une fois par session</p>
+      </div>
+
+      <div class="field">
+        <label>Clé API Hunter.io</label>
+        <input type="password" id="hunterKey" placeholder="Colle ta clé ici (elle reste dans ton navigateur)" oninput="checkHunter()" />
+      </div>
+
+      <div class="info-banner">
+        <strong>Où trouver ta clé ?</strong> hunter.io → connecte-toi → menu gauche <strong>API</strong> → copie la clé. Ne la partage jamais dans le chat.
+      </div>
+
+      <div class="field">
+        <label>Tableau de suivi Google Sheets</label>
+        <textarea id="tableau" placeholder="Ouvre ton Google Sheets → Ctrl+A → Ctrl+C → colle ici&#10;&#10;Toutes les entreprises déjà présentes seront exclues automatiquement."></textarea>
+      </div>
+
+      <div class="btns">
+        <button class="btn btn-primary" onclick="step1Next()">Analyser le tableau →</button>
+        <span id="parseInfo" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ÉTAPE 2 ═══ -->
+  <div class="panel" id="p2">
+    <div class="card">
+      <div class="card-head">
+        <h2>Nouvelles entreprises à démarcher</h2>
+        <p>Claude propose 7 cibles pertinentes absentes de ton tableau, avec le bon contact LinkedIn</p>
+      </div>
+      <div id="excludeSummary" class="info-banner"></div>
+      <button class="btn btn-primary" id="genBtn" onclick="generateCompanies()">⚡ Générer 7 entreprises</button>
+    </div>
+
+    <div id="companiesSection" style="display:none;">
+      <div class="companies-grid" id="companiesGrid"></div>
+      <div class="btns">
+        <button class="btn btn-primary" onclick="goTo(3)">Rechercher les emails →</button>
+        <button class="btn btn-ghost btn-sm" onclick="generateCompanies()">↺ Regénérer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ÉTAPE 3 ═══ -->
+  <div class="panel" id="p3">
+    <div class="card">
+      <div class="card-head">
+        <h2>Recherche automatique des emails</h2>
+        <p>Hunter.io cherche l'email professionnel de chaque contact. Si introuvable, saisis-le manuellement.</p>
+      </div>
+      <button class="btn btn-primary" id="searchBtn" onclick="searchEmails()">🔍 Lancer Hunter.io</button>
+    </div>
+    <div class="companies-grid" id="emailGrid"></div>
+    <div class="btns" id="emailNextBtns" style="display:none;">
+      <button class="btn btn-primary" onclick="goToPrompt()">Générer le prompt Claude →</button>
+    </div>
+  </div>
+
+  <!-- ═══ ÉTAPE 4 ═══ -->
+  <div class="panel" id="p4">
+    <div class="card">
+      <div class="card-head">
+        <h2>Prompt prêt pour Claude</h2>
+        <p>Copie ce texte → ouvre une nouvelle conversation Claude → colle → envoie. Claude rédigera les 3 emails et créera les brouillons Gmail.</p>
+      </div>
+
+      <div class="success-banner" style="display:none;" id="howto">
+        <h3>Comment utiliser ce prompt</h3>
+        <p>1. Clique "Copier le prompt" ci-dessous &nbsp;·&nbsp; 2. Ouvre <strong>claude.ai</strong> dans un nouvel onglet &nbsp;·&nbsp; 3. Colle et envoie &nbsp;·&nbsp; 4. Claude rédige les 3 mails et les met en brouillon Gmail</p>
+      </div>
+
+      <div class="copy-box" id="promptBox">
+        <div class="copy-box-header">
+          <span class="copy-box-title">Prompt à coller dans Claude</span>
+          <button class="copy-btn-float" onclick="copyPrompt()">📋 Copier</button>
+        </div>
+        <pre id="promptText">Le prompt apparaîtra ici...</pre>
+      </div>
+
+      <div class="info-banner">
+        <strong>Rappel :</strong> Après que Claude crée les brouillons → ouvre Gmail → Brouillons → ajoute la plaquette en PJ → planifie l'envoi (mardi 11h27)
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══ STATE ═══
+const S = {
+  hunterKey: localStorage.getItem('hk') || '',
+  excludedCompanies: [],
+  companies: [],
+  emails: {}
+};
+
+// Init Hunter key
+if (S.hunterKey) {
+  document.getElementById('hunterKey').value = S.hunterKey;
+  setHunterBadge(true);
+}
+
+// ═══ NAV ═══
+function goTo(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.progress-step').forEach(t => t.classList.remove('active'));
+  document.getElementById('p' + n).classList.add('active');
+  document.getElementById('tab' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══ HUNTER BADGE ═══
+function checkHunter() {
+  const k = document.getElementById('hunterKey').value.trim();
+  if (k) { S.hunterKey = k; localStorage.setItem('hk', k); setHunterBadge(true); }
+}
+function setHunterBadge(ok) {
+  document.getElementById('hunterDot').className = 'dot' + (ok ? ' ok' : '');
+  document.getElementById('hunterStatus').textContent = ok ? 'Hunter.io configuré' : 'Hunter.io non configuré';
+}
+
+// ═══ STEP 1 ═══
+function step1Next() {
+  const raw = document.getElementById('tableau').value.trim();
+  if (!raw) { toast('Colle ton tableau Google Sheets d\'abord', true); return; }
+
+  // Extract company names heuristically from tab-separated data
+  const seen = new Set();
+  raw.split('\n').forEach(line => {
+    line.split('\t').forEach(cell => {
+      const c = cell.trim();
+      if (
+        c.length >= 2 && c.length <= 60 &&
+        /^[A-ZÀ-Ùa-zà-ù]/.test(c) &&
+        !c.includes('@') && !c.includes('http') && !c.includes('/') &&
+        !['Date','Démarcheur','Entreprise','Nom','Mail','Etat','Commentaire',
+          'En cours','Relancé','Refus','ERREUR','Sans suite','Mail invalide',
+          'Linkedin','Colonne','pour le','envoi','AT du'].some(k => c.includes(k)) &&
+        !/^\d/.test(c) && c !== 'S1' && c !== 'S2' && c !== 'S3' && c !== 'S4'
+      ) {
+        seen.add(c);
+      }
+    });
+  });
+
+  S.excludedCompanies = [...seen];
+  S.rawTableau = raw;
+
+  const n = S.excludedCompanies.length;
+  document.getElementById('parseInfo').textContent = `${n} entreprises détectées`;
+  document.getElementById('excludeSummary').innerHTML =
+    `<strong>${n} entreprises déjà démarchées</strong> chargées depuis ton tableau → elles seront automatiquement exclues des nouvelles suggestions.`;
+
+  toast(`${n} entreprises chargées ✓`);
+  goTo(2);
+}
+
+// ═══ STEP 2 — GENERATE ═══
+async function generateCompanies() {
+  load('Analyse du tableau en cours...');
+  document.getElementById('companiesSection').style.display = 'none';
+
+  const excluded = S.excludedCompanies.join(', ');
+
+  const prompt = `Tu es l'assistant de démarchage de L'Agora, tribune étudiante de l'EDHEC Business School.
+
+MISSION : Propose exactement 7 nouvelles entreprises à démarcher pour un partenariat financier. Réponds UNIQUEMENT en JSON, sans texte avant ni après.
+
+ENTREPRISES DÉJÀ DÉMARCHÉES — À EXCLURE ABSOLUMENT :
+${excluded}
+
+CRITÈRES :
+- Lien naturel avec école de commerce (recrutement grandes écoles, marque employeur, mécénat, RSE)
+- Secteurs VARIÉS parmi : banque/assurance, conseil/audit/juridique, tech/télécom, grande conso/distribution
+- Entreprises françaises ou présentes en France, ETI ou grand groupe
+- Pas présentes dans la liste ci-dessus
+
+FORMAT JSON EXACT (tableau de 7 objets) :
+[
+  {
+    "nom": "Nom exact entreprise",
+    "secteur": "Secteur court",
+    "contact_nom": "Prénom Nom",
+    "contact_poste": "Poste exact LinkedIn",
+    "linkedin_url": "https://www.linkedin.com/in/prenom-nom/",
+    "domaine_email": "entreprise.fr",
+    "justification": "Une phrase sur pourquoi c'est un partenaire naturel pour L'Agora EDHEC"
+  }
+]`;
+
+  try {
+    const res = await claude(prompt);
+    // Robust extraction: find the JSON array anywhere in the response
+    const match = res.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('Aucun JSON trouvé dans la réponse');
+    S.companies = JSON.parse(match[0]);
+    renderCompanies();
+    document.getElementById('companiesSection').style.display = 'block';
+    // Also populate email grid
+    renderEmailGrid();
+  } catch(e) {
+    toast('Erreur génération — réessaie', true);
+    console.error(e);
+  } finally {
+    unload();
+  }
+}
+
+function renderCompanies() {
+  document.getElementById('companiesGrid').innerHTML = S.companies.map((c, i) => `
+    <div class="co-card">
+      <div class="co-sector">${c.secteur}</div>
+      <div class="co-name">${c.nom}</div>
+      <div class="co-contact">${c.contact_nom}</div>
+      <div class="co-role">${c.contact_poste}</div>
+      <a class="co-linkedin" href="${c.linkedin_url}" target="_blank">↗ ${c.linkedin_url}</a>
+      <div class="co-justif">${c.justification}</div>
+    </div>
+  `).join('');
+}
+
+// ═══ STEP 3 — EMAILS ═══
+function renderEmailGrid() {
+  document.getElementById('emailGrid').innerHTML = S.companies.map((c, i) => `
+    <div class="co-card" id="ecard${i}">
+      <div class="co-sector">${c.secteur}</div>
+      <div class="co-name">${c.nom}</div>
+      <div class="co-contact">${c.contact_nom}</div>
+      <div class="co-role">${c.contact_poste}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;">domaine: ${c.domaine_email}</div>
+      <div class="co-email-row">
+        <div class="email-dot" id="edot${i}"></div>
+        <input type="text" id="einput${i}" placeholder="email@${c.domaine_email}" />
+      </div>
+      <div id="etag${i}" style="margin-top:8px;"></div>
+    </div>
+  `).join('');
+}
+
+async function searchEmails() {
+  if (!S.hunterKey) { toast('Configure ta clé Hunter.io à l\'étape 1', true); return; }
+  if (!S.companies.length) { toast('Génère d\'abord les entreprises', true); return; }
+
+  document.getElementById('searchBtn').disabled = true;
+
+  for (let i = 0; i < S.companies.length; i++) {
+    const c = S.companies[i];
+    const dot = document.getElementById('edot' + i);
+    const inp = document.getElementById('einput' + i);
+    const tag = document.getElementById('etag' + i);
+
+    dot.className = 'email-dot searching';
+    inp.value = 'Recherche...';
+    inp.disabled = true;
+
+    try {
+      const parts = c.contact_nom.trim().split(' ');
+      const fn = encodeURIComponent(parts[0]);
+      const ln = encodeURIComponent(parts.slice(1).join(' '));
+      const url = `https://api.hunter.io/v2/email-finder?domain=${c.domaine_email}&first_name=${fn}&last_name=${ln}&api_key=${S.hunterKey}`;
+
+      const r = await fetch(url);
+      const d = await r.json();
+
+      if (d.data && d.data.email) {
+        S.emails[i] = d.data.email;
+        inp.value = d.data.email;
+        dot.className = 'email-dot found';
+        tag.innerHTML = `<span class="tag tag-green">Trouvé — confiance ${d.data.score}%</span>`;
+      } else {
+        inp.value = '';
+        inp.placeholder = 'Non trouvé — saisis manuellement';
+        dot.className = 'email-dot missing';
+        tag.innerHTML = `<span class="tag tag-orange">Non trouvé — saisie manuelle</span>`;
+      }
+    } catch(e) {
+      inp.value = '';
+      inp.placeholder = 'Erreur — saisis manuellement';
+      dot.className = 'email-dot missing';
+    }
+
+    inp.disabled = false;
+    await pause(600);
+  }
+
+  document.getElementById('searchBtn').disabled = false;
+  document.getElementById('emailNextBtns').style.display = 'flex';
+  toast('Recherche terminée ✓');
+}
+
+// ═══ STEP 4 — PROMPT ═══
+function goToPrompt() {
+  // Collect email inputs
+  S.companies.forEach((_, i) => {
+    const v = document.getElementById('einput' + i)?.value?.trim();
+    if (v && v.includes('@')) S.emails[i] = v;
+  });
+
+  const prompt = buildPrompt();
+  document.getElementById('promptText').textContent = prompt;
+  document.getElementById('howto').style.display = 'block';
+  goTo(4);
+}
+
+function buildPrompt() {
+  const contacts = S.companies.map((c, i) => {
+    const email = S.emails[i] || '[EMAIL À COMPLÉTER]';
+    return `Entreprise ${i+1} : ${c.nom}
+  Contact : ${c.contact_nom}, ${c.contact_poste}
+  Email : ${email}
+  Justification : ${c.justification}`;
+  }).join('\n\n');
+
+  return `Tu es mon assistant de démarchage pour L'Agora, tribune étudiante de l'EDHEC.
+
+MON IDENTITÉ
+- Augustin Jouve, chargé des relations partenaires
+- Mon mail : augustin.jouve@lagora-edhec.com
+- CCI sur tous les mails : mallaury.trianon@lagora-edhec.com
+- Objet : Proposition de partenariat [Entreprise] X L'Agora
+
+CONTACTS À DÉMARCHER
+${contacts}
+
+MISSION
+Rédige 7 emails de démarchage selon le template ci-dessous, puis crée les 7 brouillons Gmail (To = email du contact, Objet = "Proposition de partenariat [Entreprise] X L'Agora", BCC = mallaury.trianon@lagora-edhec.com).
+
+TEMPLATE À RESPECTER EXACTEMENT
+---
+Bonjour Madame/Monsieur [Nom],
+
+Je suis Augustin Jouve, chargé des relations partenaires de L'Agora, la tribune étudiante de l'EDHEC. Je me permets de vous contacter car j'ai vu sur LinkedIn que vous étiez [poste exact] chez [entreprise].
+
+Depuis plus de 20 ans, L'Agora organise des conférences et débats réunissant jusqu'à 900 spectateurs à l'EDHEC et diffusés sur nos réseaux. Nous avons déjà reçu plus de 200 invités tels que Patrick Pouyanné, Christine Lagarde ou encore François Hollande dernièrement.
+
+Nous sommes actuellement à la recherche d'un partenaire financier afin d'assurer le fonctionnement de l'association. [PARAGRAPHE PERSONNALISÉ : justifie pourquoi cette entreprise est un partenaire naturel — liens Alumni EDHEC, secteur, valeurs, actualité récente si pertinente.]
+
+Ce partenariat offrirait à [Entreprise] une visibilité directe auprès des étudiants de l'EDHEC, tout en bénéficiant d'une présence sur nos réseaux sociaux, avec plus de 700 000 vues cumulées sur TikTok.
+
+Je serais ravi de pouvoir échanger avec vous au sujet de cette proposition. Je vous invite à me proposer un créneau pour que nous puissions discuter de vive voix. Je vous transmets également la plaquette de notre association en PJ afin que vous puissiez mieux vous familiariser avec notre projet.
+
+Si vous n'êtes pas la personne la plus indiquée pour ce type de partenariat, je m'appuierai volontiers sur votre recommandation pour identifier la personne la plus appropriée au sein de [Entreprise].
+
+Bien à vous,
+Augustin Jouve
+Chargé des relations partenaires — L'Agora EDHEC
+augustin.jouve@lagora-edhec.com
+---
+
+Lance-toi : rédige les 7 emails puis crée les brouillons Gmail.`;
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn-float');
+    btn.textContent = '✓ Copié !';
+    btn.classList.add('copied');
+    toast('Prompt copié — colle-le dans Claude ✓');
+    setTimeout(() => { btn.textContent = '📋 Copier'; btn.classList.remove('copied'); }, 2500);
+  });
+}
+
+// ═══ CLAUDE API ═══
+async function claude(prompt) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await r.json();
+  if (!d.content?.[0]?.text) throw new Error('Pas de réponse');
+  return d.content[0].text;
+}
+
+// ═══ UTILS ═══
+function load(t) { document.getElementById('loaderText').textContent = t; document.getElementById('loader').classList.add('on'); }
+function unload() { document.getElementById('loader').classList.remove('on'); }
+function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+let toastTimer;
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'on' + (err ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3500);
+}
+</script>
+</body>
+</html>
