@@ -449,8 +449,13 @@ textarea { min-height: 200px; resize: vertical; line-height: 1.5; }
         <input type="password" id="hunterKey" placeholder="Colle ta clé ici (elle reste dans ton navigateur)" oninput="checkHunter()" />
       </div>
 
+      <div class="field">
+        <label>Clé API Anthropic (pour générer les entreprises)</label>
+        <input type="password" id="anthropicKey" placeholder="sk-ant-..." oninput="saveAnthropicKey()" />
+      </div>
+
       <div class="info-banner">
-        <strong>Où trouver ta clé ?</strong> hunter.io → connecte-toi → menu gauche <strong>API</strong> → copie la clé. Ne la partage jamais dans le chat.
+        <strong>Clés API :</strong> Hunter.io → hunter.io/dashboard → API &nbsp;|&nbsp; Anthropic → console.anthropic.com → API Keys. Ne les partage jamais dans le chat.
       </div>
 
       <div class="field">
@@ -543,6 +548,11 @@ if (S.hunterKey) {
   document.getElementById('hunterKey').value = S.hunterKey;
   setHunterBadge(true);
 }
+// Init Anthropic key
+const savedAnthropicKey = localStorage.getItem('anthropicKey') || '';
+if (savedAnthropicKey) {
+  document.getElementById('anthropicKey').value = savedAnthropicKey;
+}
 
 // ═══ NAV ═══
 function goTo(n) {
@@ -561,6 +571,11 @@ function checkHunter() {
 function setHunterBadge(ok) {
   document.getElementById('hunterDot').className = 'dot' + (ok ? ' ok' : '');
   document.getElementById('hunterStatus').textContent = ok ? 'Hunter.io configuré' : 'Hunter.io non configuré';
+}
+
+function saveAnthropicKey() {
+  const k = document.getElementById('anthropicKey').value.trim();
+  if (k) { localStorage.setItem('anthropicKey', k); }
 }
 
 // ═══ STEP 1 ═══
@@ -807,9 +822,16 @@ function copyPrompt() {
 
 // ═══ CLAUDE API ═══
 async function claude(prompt) {
+  const anthropicKey = localStorage.getItem('anthropicKey') || '';
+  if (!anthropicKey) { throw new Error('Clé Anthropic manquante — renseigne-la à l\'étape 1'); }
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
@@ -817,7 +839,7 @@ async function claude(prompt) {
     })
   });
   const d = await r.json();
-  if (!d.content?.[0]?.text) throw new Error('Pas de réponse');
+  if (!d.content?.[0]?.text) throw new Error(d.error?.message || 'Pas de réponse Claude');
   return d.content[0].text;
 }
 
